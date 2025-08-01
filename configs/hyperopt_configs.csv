@@ -1,0 +1,2 @@
+name,strategy,config_file,hyperopt_loss,epochs,max_open_trades,timeframe,days_back,space_buy,space_sell,space_roi,space_stoploss,space_trailing,enable_protections,num_runs,sleep_between_runs
+Strategy_1,Strategy_1,user_data/config.json,MultiMetricHyperOptLoss,500,2,5m,14,true,true,false,false,false,false,2,10
