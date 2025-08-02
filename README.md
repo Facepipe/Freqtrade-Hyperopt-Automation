@@ -364,3 +364,10 @@ FREQTRADE_PATHS = [
 ```bash
 python3 run_hyperopt.py
 
+Hyperopt Automation System v1.7.0
+Changes:
+- New output folder structure: output/<yyMMddhhmm>/<timeframe>/<hyperopt_loss>/<strategy>
+- Summary CSV builds incrementally as each run completes
+- Single session timestamp for all strategies
+- Maintained all previous functionality and path handling
+

@@ -12,12 +12,11 @@ import json
 import csv
 
 """
-Hyperopt Automation Executor v1.6.6
+Hyperopt Automation Executor v1.7.0
 Changes:
-- Fixed ExecutionResult reference error
-- Single summary CSV after all strategies complete
-- Per-run text files for each strategy
-- Maintained all previous fixes
+- New output folder structure: output/<yyMMddhhmm>/<timeframe>/<hyperopt_loss>/<strategy>
+- Summary CSV builds incrementally as each run completes
+- Maintained all previous functionality and path handling
 """
 
 # Constants
@@ -86,24 +85,79 @@ def parse_hyperopt_results(output: str) -> Dict[str, str]:
     
     lines = output.split('\n')
     for line in lines:
-        if 'Best Result:' in line:
-            metrics['epoch'] = line.split()[2].strip()
-        elif 'Total profit' in line:
-            metrics['total_profit'] = line.split(':')[1].strip()
-        elif 'Trades' in line and 'Avg' not in line:
-            metrics['trade_count'] = line.split(':')[1].strip()
-        elif 'Win Ratio' in line:
-            metrics['win_ratio'] = line.split(':')[1].strip()
-        elif 'Profit factor' in line:
-            metrics['profit_factor'] = line.split(':')[1].strip()
-        elif 'Max Drawdown' in line:
-            metrics['max_drawdown'] = line.split(':')[1].strip()
+        line = line.strip()
+        
+        # Look for epoch details line (contains trades, wins/draws/losses, profits)
+        if 'trades.' in line and 'Wins/Draws/Losses' in line:
+            parts = line.split()
+            # Extract epoch number (first part before '/')
+            if '*' in parts[0]:
+                epoch_part = parts[0].replace('*', '').strip()
+                if '/' in epoch_part:
+                    metrics['epoch'] = epoch_part.split('/')[0]
+            
+            # Extract trade count
+            for i, part in enumerate(parts):
+                if part.endswith(':') and i + 1 < len(parts) and parts[i + 1] == 'trades.':
+                    metrics['trade_count'] = part.rstrip(':')
+                    break
+            
+            # Extract total profit percentage
+            for i, part in enumerate(parts):
+                if 'profit' in part.lower() and i + 1 < len(parts):
+                    profit_part = parts[i + 1]
+                    if profit_part.startswith('(') and profit_part.endswith('%).'):
+                        metrics['total_profit'] = profit_part.replace('(', '').replace('%).', '')
+                        break
+            
+            # Extract win ratio from wins/draws/losses
+            wins_losses_idx = -1
+            for i, part in enumerate(parts):
+                if 'Wins/Draws/Losses' in part:
+                    wins_losses_idx = i
+                    break
+            
+            if wins_losses_idx > 0:
+                # Look for the pattern like "39/0/37" before "Wins/Draws/Losses"
+                for i in range(wins_losses_idx - 1, max(0, wins_losses_idx - 3), -1):
+                    if '/' in parts[i] and parts[i].count('/') == 2:
+                        wins, draws, losses = parts[i].split('/')
+                        total_trades = int(wins) + int(draws) + int(losses)
+                        if total_trades > 0:
+                            win_ratio = (int(wins) / total_trades) * 100
+                            metrics['win_ratio'] = f"{win_ratio:.1f}%"
+                        break
+        
+        # Look for profit factor in SUMMARY METRICS section
+        elif 'Profit factor' in line and '│' in line:
+            parts = line.split('│')
+            if len(parts) >= 3:
+                metrics['profit_factor'] = parts[2].strip()
+        
+        # Look for max drawdown in SUMMARY METRICS section
+        elif ('Max % of account underwater' in line or 'Absolute Drawdown (Account)' in line) and '│' in line:
+            parts = line.split('│')
+            if len(parts) >= 3:
+                metrics['max_drawdown'] = parts[2].strip()
     
     return metrics
 
 def generate_result_files(freqtrade_path: str, output_dir: Path, config: 'HyperoptConfig', run_num: int, logger: logging.Logger) -> Dict[str, str]:
     """Generate output files for a single run"""
-    summary_data = {}
+    summary_data = {
+        'strategy': config.strategy,
+        'run_number': str(run_num),
+        'config_name': config.name,
+        'timeframe': config.timeframe,
+        'hyperopt_loss': config.hyperopt_loss,
+        'epoch': 'N/A',
+        'total_profit': 'N/A',
+        'trade_count': 'N/A',
+        'win_ratio': 'N/A',
+        'profit_factor': 'N/A',
+        'max_drawdown': 'N/A'
+    }
+    
     try:
         # Save configuration
         config_file = output_dir / f"config_run{run_num}.json"
@@ -134,6 +188,7 @@ def generate_result_files(freqtrade_path: str, output_dir: Path, config: 'Hypero
             ]
             
             try:
+                logger.info(f"Running command: {' '.join(cmd)}")
                 result = subprocess.run(
                     cmd,
                     stdout=subprocess.PIPE,
@@ -145,32 +200,51 @@ def generate_result_files(freqtrade_path: str, output_dir: Path, config: 'Hypero
                 with open(output_file, 'w') as f:
                     f.write(result.stdout)
                 
-                if cmd_type == '--best':
-                    summary_data = parse_hyperopt_results(result.stdout)
-                    summary_data.update({
-                        'strategy': config.strategy,
-                        'run_number': str(run_num),
-                        'config_name': config.name
-                    })
+                if result.stderr:
+                    logger.warning(f"Command stderr for {name}: {result.stderr}")
+                
+                if cmd_type == '--best' and result.stdout:
+                    logger.info(f"Parsing hyperopt results for run {run_num}")
+                    parsed_metrics = parse_hyperopt_results(result.stdout)
                     
+                    # Update summary_data with parsed results, keeping defaults for missing values
+                    for key, value in parsed_metrics.items():
+                        if value and value.strip():  # Only update if we got a non-empty value
+                            summary_data[key] = value
+                    
+                    logger.info(f"Parsed metrics for run {run_num}: {parsed_metrics}")
+                    
+            except subprocess.TimeoutExpired:
+                logger.error(f"Timeout generating {name} results for run {run_num}")
             except Exception as e:
                 logger.error(f"Failed to generate {name} results for run {run_num}: {str(e)}")
         
+        logger.info(f"Final summary data for run {run_num}: {summary_data}")
         return summary_data
         
     except Exception as e:
         logger.error(f"Failed to generate result files: {str(e)}")
-        return {}
+        return summary_data  # Return the initialized summary_data even on error
 
-def create_summary_csv(all_results: List[List[ExecutionResult]], output_dir: Path):
-    """Create single CSV summary of all runs"""
-    if not any(all_results):
-        return
-        
-    csv_file = output_dir / "hyperopt_summary.csv"
+def create_output_directory_structure(base_output_dir: Path, config: 'HyperoptConfig', session_timestamp: str) -> Path:
+    """Create the new output directory structure: output/<yyMMddhhmm>/<timeframe>/<hyperopt_loss>/<strategy>"""
+    output_path = (base_output_dir / 
+                   session_timestamp / 
+                   config.timeframe / 
+                   config.hyperopt_loss / 
+                   config.strategy)
+    output_path.mkdir(parents=True, exist_ok=True)
+    return output_path
+
+def append_to_summary_csv(result: ExecutionResult, base_output_dir: Path, session_timestamp: str):
+    """Append a single result to the summary CSV as each run completes"""
+    csv_file = base_output_dir / session_timestamp / "hyperopt_summary.csv"
+    
     fieldnames = [
         'config_name',
         'strategy',
+        'timeframe',
+        'hyperopt_loss',
         'run_number',
         'epoch',
         'total_profit',
@@ -182,21 +256,45 @@ def create_summary_csv(all_results: List[List[ExecutionResult]], output_dir: Pat
         'output_dir'
     ]
     
-    with open(csv_file, 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        
-        for strategy_results in all_results:
-            for result in strategy_results:
-                if result.summary_data:  # Only include successful runs
-                    row = result.summary_data.copy()
-                    row.update({
-                        'elapsed_time': str(timedelta(seconds=result.elapsed_time)),
-                        'output_dir': str(result.metrics_dir)
-                    })
-                    writer.writerow(row)
+    # Create CSV file with header if it doesn't exist
+    if not csv_file.exists():
+        csv_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(csv_file, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+    
+    # Always append results, even if summary_data is incomplete
+    try:
+        with open(csv_file, 'a', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            
+            # Ensure all required fields are present
+            row = {}
+            for field in fieldnames:
+                if field == 'elapsed_time':
+                    row[field] = str(timedelta(seconds=result.elapsed_time))
+                elif field == 'output_dir':
+                    row[field] = str(result.metrics_dir)
+                else:
+                    # Get value from summary_data or use 'N/A' as default
+                    row[field] = result.summary_data.get(field, 'N/A')
+            
+            writer.writerow(row)
+            
+    except Exception as e:
+        # Log the error but don't fail the entire process
+        import logging
+        logger = logging.getLogger("hyperopt_automation")
+        logger.error(f"Failed to write to CSV: {str(e)}")
+        logger.error(f"Result data: {result.summary_data}")
+        logger.error(f"CSV file: {csv_file}")
 
-def run_hyperopt_series(config, output_dir, logger, dry_run=False):
+def create_summary_csv(all_results: List[List[ExecutionResult]], output_dir: Path):
+    """Legacy function - now handled by append_to_summary_csv"""
+    # This function is kept for compatibility but functionality moved to append_to_summary_csv
+    pass
+
+def run_hyperopt_series(config, output_dir, logger, session_timestamp: str = None, dry_run=False):
     """Run a series of hyperopt runs for a configuration"""
     try:
         freqtrade_path = verify_freqtrade_installation(logger)
@@ -211,8 +309,12 @@ def run_hyperopt_series(config, output_dir, logger, dry_run=False):
         logger.error(str(e))
         return []
 
-    config_dir = output_dir / config.name
-    config_dir.mkdir(parents=True, exist_ok=True)
+    # Use provided session timestamp or create new one
+    if session_timestamp is None:
+        session_timestamp = datetime.now().strftime('%y%m%d%H%M')
+    
+    # Create new directory structure
+    strategy_dir = create_output_directory_structure(output_dir, config, session_timestamp)
     
     results = []
     for run_num in range(1, config.num_runs + 1):
@@ -220,7 +322,7 @@ def run_hyperopt_series(config, output_dir, logger, dry_run=False):
             start_time = time.time()
             
             # Create run-specific directory
-            run_dir = config_dir / f"run_{run_num}"
+            run_dir = strategy_dir / f"run_{run_num}"
             run_dir.mkdir(exist_ok=True)
             
             result = run_single_hyperopt(
@@ -243,6 +345,15 @@ def run_hyperopt_series(config, output_dir, logger, dry_run=False):
             )
             
             results.append(result)
+            
+            # Append to summary CSV immediately after each run completes
+            append_to_summary_csv(result, output_dir, session_timestamp)
+            logger.info(f"Added run {run_num} results to summary CSV")
+            
+            # Sleep between runs if configured
+            if run_num < config.num_runs and config.sleep_between_runs > 0:
+                logger.info(f"Sleeping {config.sleep_between_runs} seconds between runs")
+                time.sleep(config.sleep_between_runs)
             
         except Exception as e:
             logger.error(f"Run {run_num} failed: {str(e)}")
