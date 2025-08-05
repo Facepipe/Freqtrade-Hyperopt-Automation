@@ -1,366 +1,293 @@
-# Hyperopt Automation System v1.3.1
+# 🚀 Freqtrade Hyperopt Automation System
 
-## Path Resolution
-The system now checks for freqtrade in this order:
-1. Hardcoded venv path: `/home/facepipe/freqtrade/.venv/bin/freqtrade`
-2. System PATH (if above not found)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Freqtrade 2025.6+](https://img.shields.io/badge/freqtrade-2025.6+-green.svg)](https://www.freqtrade.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Changelog
-### v1.3.1
-- Fixed freqtrade path resolution
-- Added fallback to system PATH
-- Improved error messages for missing freqtrade
-- Maintained all v1.3.0 features
+> **Automate your Freqtrade hyperopt runs across multiple strategies, timeframes, and configurations with comprehensive result tracking and analysis.**
 
-### v1.3.0
-- Added timeout protection
-- Enhanced logging
-- Dry-run capability
-- Comprehensive reporting
+## 🌟 Key Features
 
-# Hyperopt Automation System v1.4.2
+- **🔄 Batch Processing**: Run hyperopt on multiple strategies automatically
+- **📊 Multiple Configurations**: Support for different timeframes, hyperopt losses, and epochs
+- **🎨 Colored Output**: Preserves Freqtrade's colored console output for better readability
+- **📁 Organized Results**: Structured output with timestamped folders and comprehensive summaries
+- **🛡️ Error Recovery**: Continues execution even if individual runs fail
+- **🔍 Path Resolution**: Intelligent freqtrade binary detection with multiple fallback paths
+- **📈 Real-time Monitoring**: Live progress streaming with detailed logging
+- **🔧 Flexible Configuration**: Easy CSV-based configuration management
 
-## Changes in v1.4.2
-- Fixed missing subprocess import
-- Added comprehensive path verification
-- Improved version checking
-- Enhanced error messages
+## 🏗️ Project Structure
 
-## Configuration Guide
-1. Set your primary freqtrade path in `executor.py`:
-   ```python
-   FREQTRADE_PATHS = [
-       "/home/facepipe/freqtrade/.venv/bin/freqtrade",  # ← Update this
-       "~/.local/bin/freqtrade",
-       "/usr/local/bin/freqtrade",
-       shutil.which("freqtrade")
-   ]
-   
-   # Hyperopt Automation System v1.4.3
+```
+freqtrade-hyperopt-automation/
+├── 📁 configs/                  # Configuration files
+│   └── hyperopt_configs.csv     # Main hyperopt configuration
+├── 📁 output/                   # Generated results
+│   └── YYMMDD_HHMM/            # Timestamped session folders
+│       ├── hyperopt_summary.csv # Comprehensive results summary
+│       └── [timeframe]/         # Results organized by timeframe
+├── 📁 logs/                     # Execution logs
+│   ├── hyperopt/               # Hyperopt execution logs
+│   ├── errors/                 # Error logs
+│   └── debug/                  # Debug information
+├── 📁 scripts/                  # Utility scripts
+│   ├── setup_environment.sh    # Environment setup
+│   ├── backup_results.sh       # Results backup
+│   └── analyze_performance.py  # Performance analysis
+├── 📁 examples/                 # Example configurations
+├── 📄 run_hyperopt.py          # Main execution script
+├── 📄 executor.py              # Core hyperopt executor
+└── 📄 README.md               # This file
+```
 
-## Key Features
-- **Reliable Path Resolution**: Multiple fallback locations for freqtrade
-- **Version Verification**: Ensures compatible freqtrade version
-- **Comprehensive Logging**: Detailed execution logs
-- **Error Recovery**: Continues after individual run failures
-- **Dry Run Mode**: Test configurations without execution
+## 🚀 Quick Start
 
-## Installation
-1. Set your freqtrade path in `executor.py`:
-   ```python
-   FREQTRADE_PATHS = [
-       "/home/facepipe/freqtrade/.venv/bin/freqtrade",  # Primary path
-       "~/.local/bin/freqtrade",                       # User install
-       "/usr/local/bin/freqtrade",                     # System install
-       shutil.which("freqtrade")                       # PATH lookup
-   ]
-   
-# Hyperopt Automation System v1.4.4
+### 1. Prerequisites
 
-## Key Features
-- **Reliable Path Resolution**: Multiple fallback locations for freqtrade
-- **Version Verification**: Ensures compatible freqtrade version (2025.6+)
-- **Comprehensive Logging**: Detailed execution logs
-- **Error Recovery**: Continues after individual run failures
-- **Dry Run Mode**: Test configurations without execution
+- **Python 3.8+** with pip
+- **Freqtrade 2025.6+** installed and configured
+- Git for cloning the repository
 
-## Installation
-1. Set your freqtrade path in `executor.py`:
-   ```python
-   FREQTRADE_PATHS = [
-       "/home/facepipe/freqtrade/.venv/bin/freqtrade",  # Primary path
-       "~/.local/bin/freqtrade",                       # User install
-       "/usr/local/bin/freqtrade",                     # System install
-       shutil.which("freqtrade")                       # PATH lookup
-   ]
-   
-   
-# Hyperopt Automation System v1.4.6
+### 2. Installation
 
-## Key Features
-- **Fixed Working Directory Paths**: Ensures correct path resolution when run from `/home/facepipe/freqtrade/hyperopt-automation`
-- **Reliable Path Resolution**: Multiple fallback locations for freqtrade
-- **Version Verification**: Ensures compatible freqtrade version (2025.6+)
-- **Comprehensive Logging**: Detailed execution logs
-- **Error Recovery**: Continues after individual run failures
-- **Dry Run Mode**: Test configurations without execution
-- **Path Auto-resolution**: Handles relative paths in config files
-
-## Changelog
-### v1.4.6
-- Fixed working directory path resolution issues
-- Added absolute path handling for config files
-- Improved error messages for path resolution
-- Maintained all previous fixes and features
-
-### v1.4.5
-- Fixed import error for freqtrade path resolution
-- Enhanced path verification for config files
-- Maintained all previous fixes and features
-
-### v1.4.4
-- Added version requirement enforcement
-- Improved error messages
-- Maintained all v1.4.3 features
-
-### v1.4.3
-- Added multiple fallback paths for freqtrade
-- Improved version checking
-- Maintained all v1.4.2 features
-
-### v1.4.2
-- Fixed missing subprocess import
-- Added comprehensive path verification
-- Maintained all v1.4.1 features
-
-### v1.4.1
-- Added robust freqtrade path resolution
-- Version compatibility checking
-- Comprehensive error handling
-
-### v1.3.1
-- Fixed freqtrade path resolution
-- Added fallback to system PATH
-- Improved error messages for missing freqtrade
-
-### v1.3.0
-- Added timeout protection
-- Enhanced logging
-- Dry-run capability
-- Comprehensive reporting
-
-## Installation
-1. Place the script in `/home/facepipe/freqtrade/hyperopt-automation`
-2. Set your freqtrade path in `executor.py`:
-   ```python
-   FREQTRADE_PATHS = [
-       "/home/facepipe/freqtrade/.venv/bin/freqtrade",  # Primary path
-       "~/.local/bin/freqtrade",                       # User install
-       "/usr/local/bin/freqtrade",                     # System install
-       shutil.which("freqtrade")                       # PATH lookup
-   ]
-   
-# Hyperopt Automation System v1.4.7
-
-## Key Features
-- **Fixed Import Error**: Corrected freqtrade verification import
-- **Absolute Path Handling**: Ensures reliable execution from any directory
-- **Version Verification**: Requires freqtrade 2025.6+
-- **Comprehensive Logging**: Detailed execution history
-- **Error Recovery**: Continues after individual failures
-- **Path Resolution**: Multiple fallback locations for config files
-
-## Changelog
-### v1.4.7
-- Fixed import error in run_hyperopt.py
-- Enhanced absolute path handling
-- Improved error messages for missing files
-- Maintained all previous fixes
-
-### v1.4.6
-- Fixed working directory path issues
-- Added explicit path resolution
-- Maintained all v1.4.5 features
-
-### v1.4.5
-- Corrected freqtrade path verification
-- Enhanced config file checking
-- Maintained all v1.4.4 features
-
-### v1.4.4
-- Added version requirement enforcement
-- Improved error messages
-- Maintained all v1.4.3 features
-
-### v1.4.3
-- Multiple freqtrade path fallbacks
-- Enhanced version checking
-- Maintained all v1.4.2 features
-
-### v1.4.2
-- Fixed missing subprocess import
-- Comprehensive path verification
-- Maintained all v1.4.1 features
-
-### v1.4.1
-- Robust freqtrade resolution
-- Version compatibility checks
-- Maintained all v1.3.x features
-
-## Installation
-1. Clone to `/home/facepipe/freqtrade/hyperopt-automation`
-2. Set freqtrade path in `executor.py`:
-   ```python
-   FREQTRADE_PATHS = [
-       "/home/facepipe/freqtrade/.venv/bin/freqtrade",
-       "~/.local/bin/freqtrade",
-       "/usr/local/bin/freqtrade",
-       shutil.which("freqtrade")
-   ]
-   
-
-## Configuration
-1. Place `hyperopt_configs.csv` in `configs/` directory
-2. Config file paths can be:
-- Absolute: `/home/facepipe/freqtrade/user_data/config.json`
-- Relative to freqtrade: `user_data/config.json`
-- Relative to script: `../freqtrade/user_data/config.json`
-
-## Troubleshooting
-- **Config CSV Not Found**:
-- Ensure file exists at `hyperopt-automation/configs/hyperopt_configs.csv`
-- **Config Files Not Found**:
-- Check error message for resolved absolute path
-- Verify file exists at that location
-- **Version Errors**:
-- Run `freqtrade --version` to check
-- Update freqtrade if needed
-
-# Hyperopt Automation System v1.4.8
-
-## Key Features
-- **Fixed Config Paths**: Correctly handles configs in `configs/` directory
-- **Version Verification**: Requires freqtrade 2025.6+
-- **Enhanced Diagnostics**: Detailed error messages for path issues
-- **Error Recovery**: Continues after individual failures
-- **Path Resolution**: Multiple fallback locations for all files
-
-## Changelog
-### v1.4.8
-- Fixed config file path resolution
-- Added specific error messages for missing CSV
-- Maintained all previous fixes
-
-### v1.4.7
-- Fixed import error in run_hyperopt.py
-- Enhanced absolute path handling
-- Maintained all v1.4.6 features
-
-### v1.4.6
-- Fixed working directory path issues
-- Added explicit path resolution
-- Maintained all v1.4.5 features
-
-## Installation
-1. Clone to `/home/facepipe/freqtrade/hyperopt-automation`
-2. Directory structure:
-
-# Hyperopt Automation System v1.6.1
-
-## Key Features
-- **Fixed Timerange Format**: Now properly includes trailing dash in timerange parameter
-- **Real-time Output**: Streams hyperopt progress to console
-- **Working Directory Fix**: Runs from correct freqtrade directory
-- **Path Resolution**: Multiple fallback locations for freqtrade
-- **Version Verification**: Ensures compatible freqtrade version (2025.6+)
-
-## Changelog
-### v1.6.1
-- Fixed timerange format to include required trailing dash
-- Maintained real-time console output streaming
-- Preserved all path resolution fixes
-- Improved documentation
-
-### v1.6.0
-- Initial working version with command execution fix
-- Added comprehensive path verification
-- Enhanced error handling
-
-## Configuration
-1. Set your freqtrade paths in `executor.py`:
-```python
-FREQTRADE_PATHS = [
-    "/home/facepipe/freqtrade/.venv/bin/freqtrade",
-    "~/.local/bin/freqtrade",
-    "/usr/local/bin/freqtrade",
-    shutil.which("freqtrade")
-]
-
-
-# Hyperopt Automation System v1.6.2
-
-## Key Features
-- **Colored Console Output**: Preserves freqtrade's colored output
-- **Fixed Timerange Format**: Proper --timerange format with trailing dash
-- **Real-time Output**: Direct console streaming with colors
-- **Working Directory Fix**: Correct execution context
-- **Path Resolution**: Multiple fallback locations
-
-## Changelog
-### v1.6.2
-- Preserved colored console output
-- Fixed timerange format
-- Improved output streaming
-- Maintained all previous fixes
-
-### v1.6.1
-- Fixed timerange format
-- Real-time output streaming
-- Working directory fixes
-
-## Configuration
-```python
-FREQTRADE_PATHS = [
-    "/home/facepipe/freqtrade/.venv/bin/freqtrade",
-    "~/.local/bin/freqtrade",
-    "/usr/local/bin/freqtrade",
-    shutil.which("freqtrade")
-]
-
-# Hyperopt Automation System v1.6.3
-
-## New Features
-- **Output Generation**:
-  - `configuration.json`: Full run parameters
-  - `results_best.txt`: Output of `hyperopt-show --best`
-  - `results_profitable.txt`: Output of `hyperopt-list --profitable`
-
-## File Structure
-
-# Hyperopt Automation System v1.6.4
-
-## New Features
-- **Per-Run Output Files**:
-  - `results_best_runX.txt`: Best results for each run
-  - `results_profitable_runX.txt`: Profitable results for each run
-  - `config_runX.json`: Configuration for each run
-
-- **Summary CSV**:
-  - Contains key metrics for all runs
-  - Includes: strategy, run number, profit, win ratio, etc.
-  - Saved as `hyperopt_summary.csv`
-
-## File Structure
-
-
-## Changelog
-### v1.6.5
-- Fixed base_dir reference error
-- Single summary CSV after all strategies complete
-- Improved directory structure
-- Maintained all previous fixes
-
-### v1.6.4
-- Added per-run text files
-- Enhanced error handling
-
-# Hyperopt Automation System v1.6.5
-
-## File Output Structure
-
-
-## Changelog
-### v1.6.6
-- Fixed ExecutionResult reference error
-- Single comprehensive summary CSV
-- Per-run text files for each strategy
-- Maintained all previous fixes:
-  - Colored console output
-  - Timerange formatting
-  - Path resolution
-  - Error handling
-
-## Usage
 ```bash
+# Clone the repository
+git clone https://github.com/Facepipe/Freqtrade-Hyperopt-Automation.git
+cd Freqtrade-Hyperopt-Automation
+
+# Run the setup script
+./scripts/setup_environment.sh
+
+# Make scripts executable (if needed)
+chmod +x scripts/*.sh *.py
+```
+
+### 3. Configuration
+
+#### Configure Freqtrade Paths
+
+Edit `executor.py` and update the `FREQTRADE_PATHS` list with your freqtrade installation path:
+
+```python
+FREQTRADE_PATHS = [
+    "/home/yourusername/freqtrade/.venv/bin/freqtrade",  # Update this path
+    "~/.local/bin/freqtrade",                            # User installation
+    "/usr/local/bin/freqtrade",                          # System installation
+    shutil.which("freqtrade")                            # PATH lookup
+]
+```
+
+#### Configure Hyperopt Runs
+
+Edit `configs/hyperopt_configs.csv`:
+
+```csv
+strategy,timeframe,hyperopt_loss,epochs,config_file,timerange
+SampleStrategy,5m,SharpeHyperOptLoss,100,user_data/config.json,20240101-20240201
+MyStrategy,1h,OnlyProfitHyperOptLoss,200,user_data/config_alt.json,20240101-20240301
+```
+
+**Configuration Parameters:**
+- **strategy**: Strategy class name
+- **timeframe**: Candlestick timeframe (1m, 5m, 1h, etc.)
+- **hyperopt_loss**: Loss function (SharpeHyperOptLoss, OnlyProfitHyperOptLoss, etc.)
+- **epochs**: Number of hyperopt iterations
+- **config_file**: Path to freqtrade configuration file
+- **timerange**: Date range for backtesting (YYYYMMDD-YYYYMMDD)
+
+### 4. Running Hyperopt
+
+```bash
+# Run all configured hyperopt sessions
 python3 run_hyperopt.py
 
+# Or with explicit path
+/usr/bin/python3 run_hyperopt.py
+```
+
+## 📊 Output Structure
+
+Each hyperopt session creates a timestamped folder with organized results:
+
+```
+output/
+└── 250105_1430/                    # Session timestamp (YYMMDD_HHMM)
+    ├── hyperopt_summary.csv         # Consolidated results
+    ├── 5m/                         # Timeframe-specific results
+    │   └── SharpeHyperOptLoss/     # Loss function results
+    │       └── SampleStrategy/      # Strategy-specific outputs
+    │           ├── config_run1.json
+    │           ├── results_best_run1.txt
+    │           └── results_profitable_run1.txt
+    └── 1h/
+        └── OnlyProfitHyperOptLoss/
+            └── MyStrategy/
+                ├── config_run2.json
+                ├── results_best_run2.txt
+                └── results_profitable_run2.txt
+```
+
+### Summary CSV Format
+
+The `hyperopt_summary.csv` contains key metrics for all runs:
+
+| Column | Description |
+|--------|-------------|
+| `session_id` | Unique session identifier |
+| `run_number` | Sequential run number |
+| `strategy` | Strategy name |
+| `timeframe` | Used timeframe |
+| `hyperopt_loss` | Loss function |
+| `epochs` | Number of epochs |
+| `total_profit` | Total profit percentage |
+| `win_ratio` | Win ratio percentage |
+| `avg_profit` | Average profit per trade |
+| `total_trades` | Total number of trades |
+| `start_time` | Run start timestamp |
+| `end_time` | Run completion timestamp |
+| `duration` | Execution duration |
+| `status` | Success/failure status |
+
+## 🔧 Advanced Usage
+
+### Custom Loss Functions
+
+The system supports all built-in Freqtrade loss functions:
+
+- `SharpeHyperOptLoss` - Optimizes Sharpe ratio
+- `OnlyProfitHyperOptLoss` - Focuses only on profit
+- `SortinoHyperOptLoss` - Optimizes Sortino ratio
+- `CalmarHyperOptLoss` - Optimizes Calmar ratio
+- `MaxDrawDownHyperOptLoss` - Minimizes maximum drawdown
+
+### Backup and Analysis
+
+```bash
+# Create backup of results
+./scripts/backup_results.sh
+
+# Analyze performance
+python3 scripts/analyze_performance.py
+
+# Quick performance overview
+grep "Best result" output/*/logs/*.log
+```
+
+### Troubleshooting
+
+#### Common Issues
+
+**1. Freqtrade Not Found**
+```bash
+# Check if freqtrade is in PATH
+which freqtrade
+
+# Verify version
+freqtrade --version
+
+# Update path in executor.py
+```
+
+**2. Configuration File Not Found**
+```bash
+# Check file exists
+ls -la configs/hyperopt_configs.csv
+
+# Verify config file paths in CSV
+cat configs/hyperopt_configs.csv
+```
+
+**3. Permission Errors**
+```bash
+# Make scripts executable
+chmod +x scripts/*.sh *.py
+
+# Check directory permissions
+ls -la
+```
+
+## 📈 Performance Tips
+
+### Optimization Strategies
+
+1. **Start Small**: Begin with fewer epochs (50-100) to test configurations
+2. **Progressive Refinement**: Use successful parameters as starting points
+3. **Multiple Runs**: Run the same configuration multiple times with different random states
+4. **Resource Management**: Monitor CPU and memory usage during long runs
+
+### Best Practices
+
+- **Data Quality**: Ensure you have sufficient historical data
+- **Timerange Selection**: Use meaningful date ranges for backtesting
+- **Strategy Validation**: Validate strategies in dry-run before live trading
+- **Regular Backups**: Backup successful configurations and results
+
+## 🔄 Version History
+
+### v1.7.0 (Current - Output Improvements Branch)
+- ✨ **New**: Organized output folder structure by session/timeframe/loss/strategy
+- ✨ **New**: Incremental summary CSV building
+- ✨ **New**: Single session timestamps for better organization
+- 🐛 **Fixed**: Maintained all previous functionality and path handling
+
+### v1.6.6
+- 🐛 **Fixed**: ExecutionResult reference error
+- ✨ **New**: Single comprehensive summary CSV
+- ✨ **New**: Per-run text files for each strategy
+- ✅ **Maintained**: Colored console output, timerange formatting, path resolution
+
+### v1.6.5
+- 🐛 **Fixed**: Base directory reference error
+- ✨ **New**: Single summary CSV after all strategies complete
+- ✨ **Improved**: Directory structure organization
+
+### Earlier Versions
+- Path resolution improvements
+- Error handling enhancements
+- Console output formatting
+- Real-time progress streaming
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+
+### Development Setup
+
+```bash
+# Clone and setup development environment
+git clone https://github.com/Facepipe/Freqtrade-Hyperopt-Automation.git
+cd Freqtrade-Hyperopt-Automation
+
+# Create feature branch
+git checkout -b feature/your-feature-name
+
+# Make changes and test
+python3 run_hyperopt.py
+
+# Commit and push
+git commit -m "Add your feature"
+git push origin feature/your-feature-name
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Freqtrade](https://www.freqtrade.io/) - The excellent cryptocurrency trading bot
+- The Freqtrade community for strategies and guidance
+- Contributors and users of this automation system
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/Facepipe/Freqtrade-Hyperopt-Automation/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Facepipe/Freqtrade-Hyperopt-Automation/discussions)
+- **Freqtrade Documentation**: [Official Docs](https://www.freqtrade.io/en/stable/)
+
+---
+
+**⚠️ Disclaimer**: This tool is for educational and research purposes. Cryptocurrency trading involves substantial risk. Always test strategies thoroughly in dry-run mode before using real funds.
+
+**🎯 Made with ❤️ for the Freqtrade community**
