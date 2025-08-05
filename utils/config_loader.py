@@ -8,6 +8,7 @@ class HyperoptConfig:
     name: str
     strategy: str
     config_file: str
+    pairs_file: str
     hyperopt_loss: str
     epochs: int
     max_open_trades: int
@@ -23,13 +24,24 @@ class HyperoptConfig:
     sleep_between_runs: int
 
     def __post_init__(self):
-        self.config_file = self._resolve_path()
+        self.config_file = self._resolve_path(self.config_file)
+        self.pairs_file = self._resolve_path(self.pairs_file)
 
-    def _resolve_path(self) -> str:
-        path = Path(self.config_file)
+    def _resolve_path(self, file_path: str) -> str:
+        """Resolve relative paths to absolute paths"""
+        path = Path(file_path)
         if path.is_absolute():
             return str(path)
-        return str(Path("/home/facepipe/freqtrade/user_data") / path.name)
+        
+        # For relative paths, assume they're relative to the freqtrade user_data directory
+        base_path = Path("/home/facepipe/freqtrade/user_data")
+        
+        # Handle paths that already include user_data prefix
+        if file_path.startswith("user_data/"):
+            return str(Path("/home/facepipe/freqtrade") / file_path)
+        
+        # Otherwise, assume it's relative to user_data
+        return str(base_path / path.name)
 
     @property
     def spaces(self) -> List[str]:
@@ -40,6 +52,11 @@ class HyperoptConfig:
             ('stoploss', self.space_stoploss),
             ('trailing', self.space_trailing)
         ] if enabled]
+
+    @property
+    def config_files(self) -> List[str]:
+        """Return list of config files for the freqtrade command"""
+        return [self.config_file, self.pairs_file]
 
 def load_configurations(csv_path: Path) -> List[HyperoptConfig]:
     if not csv_path.exists():
@@ -52,7 +69,8 @@ def load_configurations(csv_path: Path) -> List[HyperoptConfig]:
                 configs.append(HyperoptConfig(
                     name=row['name'],
                     strategy=row['strategy'],
-                    config_file=row['config_file'],
+                    config_file=row['config'],
+                    pairs_file=row['pairs'],
                     hyperopt_loss=row['hyperopt_loss'],
                     epochs=int(row['epochs']),
                     max_open_trades=int(row['max_open_trades']),

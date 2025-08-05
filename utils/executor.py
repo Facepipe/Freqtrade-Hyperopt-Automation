@@ -150,6 +150,8 @@ def generate_result_files(freqtrade_path: str, output_dir: Path, config: 'Hypero
         'config_name': config.name,
         'timeframe': config.timeframe,
         'hyperopt_loss': config.hyperopt_loss,
+        'config_file': config.config_file,
+        'pairs_file': config.pairs_file,
         'epoch': 'N/A',
         'total_profit': 'N/A',
         'trade_count': 'N/A',
@@ -169,7 +171,9 @@ def generate_result_files(freqtrade_path: str, output_dir: Path, config: 'Hypero
                 'epochs': config.epochs,
                 'timerange': f"{(datetime.now() - timedelta(days=config.days_back)).strftime('%Y%m%d')}-",
                 'spaces': config.spaces,
-                'run_number': run_num
+                'run_number': run_num,
+                'config_file': config.config_file,
+                'pairs_file': config.pairs_file
             }, f, indent=4)
 
         # Generate hyperopt results
@@ -184,7 +188,8 @@ def generate_result_files(freqtrade_path: str, output_dir: Path, config: 'Hypero
                 freqtrade_path,
                 "hyperopt-show",
                 cmd_type,
-                "-c", config.config_file
+                "-c", config.config_file,
+                "-c", config.pairs_file
             ]
             
             try:
@@ -245,6 +250,8 @@ def append_to_summary_csv(result: ExecutionResult, base_output_dir: Path, sessio
         'strategy',
         'timeframe',
         'hyperopt_loss',
+        'config_file',
+        'pairs_file',
         'run_number',
         'epoch',
         'total_profit',
@@ -374,6 +381,7 @@ def run_single_hyperopt(config, run_num, output_dir, logger, freqtrade_path: str
         "-e", str(config.epochs),
         "--max-open-trades", str(config.max_open_trades),
         "-c", config.config_file,
+        "-c", config.pairs_file,
         "--spaces"
     ]
     cmd.extend(config.spaces)
